@@ -1,5 +1,5 @@
 <h1 align="center" style="color:#4CAF50;">
-  🛡️ Fence Tension & Tamper Detection System
+  🛡️ Smart Fence Monitoring System
 </h1>
 
 <p align="center">
