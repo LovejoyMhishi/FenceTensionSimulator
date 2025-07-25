@@ -51,7 +51,7 @@ The program assumes:
 If any of the following is true:
 
 - When THR are exceded
-- `dx`, `dy`, or `dz` exceeds **a defined value*
+- `dx`, `dy`, or `dz` exceeds *A Defined Value*
 
 Then:
 - A **red alert message** is shown in the 3D plot
