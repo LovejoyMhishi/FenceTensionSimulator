@@ -1,57 +1,67 @@
 <h1 align="center" style="color:#4CAF50;">
-  🌐 Fence Tension Simulator 🔧
+  🛡️ Fence Tension & Tamper Detection System
 </h1>
 
 <p align="center">
-  <em>A physics-based simulator for modeling wire tension in fencing systems</em><br>
-  <strong>Built by Lovejoy Mhishi</strong>
+  <em>Real-time magnetic field visualizer with 3D tension modeling and tamper detection alerts</em><br>
+  <strong>By Lovejoy Mhishi</strong>
 </p>
 
 ---
 
-## 🎯 What Is This?
+## 🌟 What It Does
 
-The **Fence Tension Simulator** is a tool for modeling and visualizing the behavior of wire fences under mechanical tension and environmental effects.
+This Python-based system connects to a microcontroller (like an Arduino or ESP32) and:
 
-Whether you're:
-- 🔩 Designing fences in the field  
-- 📈 Analyzing mechanical loads  
-- 🧪 Comparing different materials  
-
-This tool helps you understand how tension, temperature, and material type affect wire performance.
-
----
-
-## ✨ Key Features
-
-✅ Realistic tension simulation using elastic deformation models  
-✅ Material selection: steel, aluminum, high-tensile wire, etc.  
-✅ Temperature compensation and stress/strain visualizations  
-✅ Beautiful, clear plots showing force, tension, and elongation  
-✅ Optional batch configuration support using YAML  
-✅ Exportable results (`.csv`, `.png`, `.svg`)
+- 📶 **Reads real-time magnetic field data** via serial (Bx, By, Bz)
+- 📊 **Plots field values and rate of change** in 2D over time
+- 🧵 **Visualizes fence tension as a 3D curve**
+- 🚨 **Detects tampering** using magnetic thresholds and rate-of-change triggers
+- 🔔 **Triggers audible alarms** when suspicious activity is detected
+- 📈 Displays **count of breaches** and **elapsed time** since the last breach
 
 ---
 
-## 🧠 How It Works
+## 🧠 Core Concepts
 
-The simulator uses physics-based equations:
-
-- **Hooke’s Law** for force and elongation:  
-  _F = k × ΔL_  
-- **Thermal expansion** due to temperature changes  
-- **Stress and strain** calculations across wire length  
-
-Each simulation gives you plots and summary data that help in planning or analysis.
+The program assumes:
+- A magnetic sensor is mounted on or near the fence
+- External disturbances (tugging, vibrations) cause sudden changes in field strength or direction
+- Thresholds (`Z_THR`, `X_THR`) and derivatives (`dBx`, `dBy`, `dBz`) signal possible tampering
 
 ---
 
-## ⚙️ Example Simulation
+## 🎥 Real-Time Visuals
 
-```bash
-python simulate.py \
-  --length 100 \
-  --diameter 4 \
-  --material steel \
-  --force 600 \
-  --temperature 25
+### 1️⃣ **3D Tension Plot**
+- A Bézier curve represents the tensioned wire
+- The magnetic field vector influences the curve shape
+- Additional strands simulate the full wire array
+
+### 2️⃣ **2D Magnetic Field Graph**
+- Shows `Bx`, `By`, `Bz` vs. time  
+- Overlaid with `Z_THR` and `X_THR` for context
+
+### 3️⃣ **2D Derivative Graph**
+- Visualizes the **rate of change** (`dBx/dt`, `dBy/dt`, `dBz/dt`)
+- Threshold line (ΔB_THR = 2 mT/sample) indicates alarm zone
+
+---
+
+## 🚨 Tamper Alerts
+
+If any of the following is true:
+
+- `bz < Z_THR` or `bz > X_THR`
+- `dBx`, `dBy`, or `dBz` exceeds **2 mT/sample**
+
+Then:
+- A **red alert message** is shown in the 3D plot
+- A **beep alert** is triggered using `winsound.Beep()`
+
+---
+
+## 📦 Serial Data Format
+
+The incoming serial line must follow this format:
+
