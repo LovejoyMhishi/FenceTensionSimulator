@@ -66,7 +66,7 @@ The incoming serial line must follow this format:
 Xx=xxxx Yy=yyyy Zz=zzzz X_THR=xxxx Z_THR=zzzz dx=xx dy=yyyy dz=zzzz FenceBreach=x Time=x.xx
 
 
-> Units are expected in **microtesla**, scaled by `÷1000` in the script.
+> Units are scaled by `÷1000` in the script.
 
 ---
 
