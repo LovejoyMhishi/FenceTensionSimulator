@@ -25,7 +25,7 @@ This Python-based system connects to a microcontroller (like an Arduino or ESP32
 
 The program assumes:
 - External disturbances (tugging, vibrations) cause sudden changes on thr fence
-- Fence thresholds (`Z_THR`, `X_THR`) and derivatives (`dx`, `dy`, `dz`) signal possible tampering
+- Fence thresholds (`Fence0_THR`, `Fence1_THR`) and derivatives (`dx`, `dy`, `dz`) signal possible tampering
 
 ---
 
