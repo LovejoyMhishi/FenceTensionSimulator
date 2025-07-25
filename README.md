@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  <em>Real-time magnetic field visualizer with 3D tension modeling and tamper detection alerts</em><br>
+  <em>Real-time fence tension monitoring and tamper detection system</em><br>
 </p>
 
 ---
