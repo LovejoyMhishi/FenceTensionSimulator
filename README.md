@@ -17,7 +17,7 @@ This Python-based system connects to a microcontroller (like an Arduino or ESP32
 - 🧵 **Visualizes fence tension as a 3D curve**
 - 🚨 **Detects tampering** using defined fence thresholds and rate-of-change triggers
 - 🔔 **Triggers audible alarms** when suspicious activity is detected
-- 📈 Displays **count of breaches** and **elapsed time** since the last breach
+- 📈 Displays **count of breaches** 
 
 ---
 
