@@ -36,8 +36,8 @@ The program assumes:
 - The magnetic field vector influences the curve shape
 - Additional strands simulate the full wire array
 
-### 2️⃣ **2D Magnetic Field Graph**
-- Shows `Bx`, `By`, `Bz` vs. time  
+### 2️⃣ **2D  Graph**
+- Shows `x`, `y`, `z` vs. time  
 - Overlaid with `Z_THR` and `X_THR` for context
 
 ### 3️⃣ **2D Derivative Graph**
