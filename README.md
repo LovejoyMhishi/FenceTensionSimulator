@@ -12,7 +12,7 @@
 
 This Python-based system connects to a microcontroller (like an Arduino or ESP32) and:
 
-- 📶 **Reads real-time magnetic field data** via serial (Bx, By, Bz)
+- 📶 **Reads real-time data** via serial (x, y, z)
 - 📊 **Plots field values and rate of change** in 2D over time
 - 🧵 **Visualizes fence tension as a 3D curve**
 - 🚨 **Detects tampering** using defined fence thresholds and rate-of-change triggers
