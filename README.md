@@ -42,7 +42,7 @@ The program assumes:
 
 ### 3️⃣ **2D Derivative Graph**
 - Visualizes the **rate of change** (`dx/dt`, `dy/dt`, `dz/dt`)
-- Threshold line (ΔFenceTens_THR = xx) indicates alarm zone
+- Threshold line (ΔXYZ_THR = xyz) indicates alarm zone
 
 ---
 
