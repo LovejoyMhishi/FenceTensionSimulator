@@ -4,7 +4,6 @@
 
 <p align="center">
   <em>Real-time magnetic field visualizer with 3D tension modeling and tamper detection alerts</em><br>
-  <strong>By Lovejoy Mhishi</strong>
 </p>
 
 ---
@@ -16,7 +15,7 @@ This Python-based system connects to a microcontroller (like an Arduino or ESP32
 - 📶 **Reads real-time magnetic field data** via serial (Bx, By, Bz)
 - 📊 **Plots field values and rate of change** in 2D over time
 - 🧵 **Visualizes fence tension as a 3D curve**
-- 🚨 **Detects tampering** using magnetic thresholds and rate-of-change triggers
+- 🚨 **Detects tampering** using defined fence thresholds and rate-of-change triggers
 - 🔔 **Triggers audible alarms** when suspicious activity is detected
 - 📈 Displays **count of breaches** and **elapsed time** since the last breach
 
@@ -25,9 +24,8 @@ This Python-based system connects to a microcontroller (like an Arduino or ESP32
 ## 🧠 Core Concepts
 
 The program assumes:
-- A magnetic sensor is mounted on or near the fence
-- External disturbances (tugging, vibrations) cause sudden changes in field strength or direction
-- Thresholds (`Z_THR`, `X_THR`) and derivatives (`dBx`, `dBy`, `dBz`) signal possible tampering
+- External disturbances (tugging, vibrations) cause sudden changes on thr fence
+- Fence thresholds (`Z_THR`, `X_THR`) and derivatives (`dx`, `dy`, `dz`) signal possible tampering
 
 ---
 
@@ -43,7 +41,7 @@ The program assumes:
 - Overlaid with `Z_THR` and `X_THR` for context
 
 ### 3️⃣ **2D Derivative Graph**
-- Visualizes the **rate of change** (`dBx/dt`, `dBy/dt`, `dBz/dt`)
+- Visualizes the **rate of change** (`dx/dt`, `dy/dt`, `dz/dt`)
 - Threshold line (ΔB_THR = 2 mT/sample) indicates alarm zone
 
 ---
@@ -52,8 +50,8 @@ The program assumes:
 
 If any of the following is true:
 
-- `bz < Z_THR` or `bz > X_THR`
-- `dBx`, `dBy`, or `dBz` exceeds **2 mT/sample**
+- When THR are exceded
+- `dx`, `dy`, or `dz` exceeds **a defined value*
 
 Then:
 - A **red alert message** is shown in the 3D plot
@@ -64,4 +62,32 @@ Then:
 ## 📦 Serial Data Format
 
 The incoming serial line must follow this format:
+
+Bx=xxxx By=yyyy Bz=zzzz X_THR=xxxx Z_THR=zzzz dBx=xx dBy=yyyy dBz=zzzz FenceBreach=x Time=x.xx
+
+
+> Units are expected in **microtesla**, scaled by `÷1000` in the script.
+
+---
+
+## 📂 Project Files
+- FenceTensSim.py
+
+---
+
+## 👨‍💻 Built With
+
+- **Python** (3.x)
+- **Matplotlib** – 2D and 3D plotting
+- **PySerial** – Serial communication
+- **NumPy** – Vector math
+- **winsound** – PC speaker alerts (Windows only)
+
+---
+
+
+> “Fences aren't just physical — they're smart, too.”
+
+---
+
 
