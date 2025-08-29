@@ -5,11 +5,20 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from collections import deque
 import winsound
+import csv
+import time
 
 # --- Serial setup ---
-ser = serial.Serial('COM8', 115200, timeout=5)
+ser = serial.Serial('COM5', 115200, timeout=5)
 time.sleep(2)
 print("Connected to:", ser.name)
+
+# --- CSV setup (once, before loop) ---
+csvfile = open("SBT_data_logger.csv", mode="w", newline='')
+fieldnames = ["Timestamp", "FenceBreachCount", "Bx", "By", "Bz","X_THR_min","Z_THR_max", "Temperature", "SecondCount"]
+writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+writer.writeheader()
+prev_hour = time.strftime("%H")
 
 # --- 3D plot setup ---
 plt.ion()
@@ -23,18 +32,23 @@ offset = 0.2  # vertical offset for extra strands
 
 # --- 2D plot setup (Field values) ---
 fig2, ax2d = plt.subplots(figsize=(8, 4))
+ax2d.set_facecolor("#cccccc")
 x_vals = deque(maxlen=100)
 bx_vals = deque(maxlen=100)
 by_vals = deque(maxlen=100)
 bz_vals = deque(maxlen=100)
 z_thr = deque(maxlen=100)
+z_thr_min = deque(maxlen=100)
 x_thr = deque(maxlen=100)
+x_thr_max = deque(maxlen=100)
 
 line_bx, = ax2d.plot([], [], label='Bx')
 line_by, = ax2d.plot([], [], label='By')
 line_bz, = ax2d.plot([], [], label='Bz')
 line_z_thr, = ax2d.plot([], [], 'g-.', label='Z_THR', linewidth=1.5)
-line_x_thr, = ax2d.plot([], [], 'g-.', label='', linewidth=1.5)
+line_z_thr_min, = ax2d.plot([], [], 'g-.', label='', linewidth=1.5)
+line_x_thr, = ax2d.plot([], [], color='#1f77b4', linestyle='-.', label='X_THR', linewidth=1.5)
+line_x_thr_max, = ax2d.plot([], [], color='#1f77b4', linestyle='-.', label='', linewidth=1.5)
 
 ax2d.set_xlabel('Sample')
 ax2d.set_ylabel('Magnetic Field (mT)')
@@ -44,7 +58,7 @@ ax2d.grid(True)
 
 # --- 2D plot setup (Rate of Change) ---
 fig3, ax_deriv = plt.subplots(figsize=(8, 4))
-ax_deriv.set_facecolor('#d3d3d3')
+ax_deriv.set_facecolor("#cacaca")
 bx_deriv = deque(maxlen=100)
 by_deriv = deque(maxlen=100)
 bz_deriv = deque(maxlen=100)
@@ -60,6 +74,31 @@ ax_deriv.set_title('The Change in Magnetic Fields')
 ax_deriv.legend()
 ax_deriv.grid(True)
 
+
+# --- 2D plot setup (Fig 4: B-field + Temperature) ---
+fig4, ax4_left = plt.subplots(figsize=(10, 5))
+ax4_right = ax4_left.twinx()  # create right y-axis
+
+time_vals = deque(maxlen=60)  # last 60 minutes
+bx_vals_plot = deque(maxlen=60)
+by_vals_plot = deque(maxlen=60)
+bz_vals_plot = deque(maxlen=60)
+temp_vals_plot = deque(maxlen=60)
+
+line_bx4, = ax4_left.plot([], [], label='Bx')
+line_by4, = ax4_left.plot([], [], label='By')
+line_bz4, = ax4_left.plot([], [], label='Bz')
+line_temp4, = ax4_right.plot([], [], label='Temperature', color='r', linestyle='--')
+
+ax4_left.set_xlabel('Time')
+ax4_left.set_ylabel('Magnetic Field (mT)')
+ax4_right.set_ylabel('Temperature (°C)')
+ax4_left.set_title('Real-Time B-fields and Temperature')
+ax4_left.legend(loc='upper left')
+ax4_right.legend(loc='upper right')
+ax4_left.grid(True)
+
+
 # --- Main loop ---
 i = 0
 try:
@@ -68,28 +107,79 @@ try:
         if not line:
             continue
 
-        # Debug raw line if needed
-        # print("RAW:", line)
-
         try:
             parts = line.split()
-            bx = float(parts[0].split('=')[1]) / 1000
-            by = float(parts[1].split('=')[1]) / 1000
-            bz = float(parts[2].split('=')[1]) / 1000
-            X_THR = float(parts[3].split('=')[1])
-            Z_THR = float(parts[4].split('=')[1])
-            dbx = float(parts[5].split('=')[1]) / 1000
-            dby = float(parts[6].split('=')[1]) / 1000
-            dbz = float(parts[7].split('=')[1]) / 1000
-            FenceBreachCount= float(parts[8].split('=')[1])
-            TimeElasped = float(parts[9].split('=')[1])
+            bx = float(parts[0].split('=')[1]) / 1
+            by = float(parts[1].split('=')[1]) / 100
+            bz = float(parts[2].split('=')[1]) / 1
+            Z_THR = float(parts[3].split('=')[1]) /10 
+            Z_THR_min = float(parts[3].split('=')[1]) /10 - 6
 
-            print(f"Magnetic Fields: Bx={bx:.3f}, By={by:.3f}, Bz={bz:.3f}, X_THR={X_THR}, Z_THR={Z_THR}")
+            X_THR = float(parts[4].split('=')[1]) /10
+            X_THR_max = float(parts[4].split('=')[1]) /10 + 6
+
+            dbx = float(parts[5].split('=')[1]) / 10
+            dby = float(parts[6].split('=')[1]) / 10
+            dbz = float(parts[7].split('=')[1]) / 1
+            FenceBreachCount= float(parts[8].split('=')[1]) + 1
+            TimeElasped = float(parts[9].split('=')[1])
+            Time = float(parts[10].split('=')[1])
+            ADC = float(parts[11].split('=')[1])/10
+            Temperature = float(parts[12].split('=')[1])
+            DeltaTemp = float(parts[13].split('=')[1])
+
+             # Prepare row
+            row = {
+                "Timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "FenceBreachCount": FenceBreachCount,
+                "Bx":bx,
+                "By":by,
+                "Bz":bz,
+                "Z_THR_min":X_THR,
+                "Z_THR_max":Z_THR,
+                "Temperature": Temperature,
+                "SecondCount": Time
+           }
+            
+            curr_hour = time.strftime("%H")
+            if curr_hour != prev_hour:
+                 # Write row to CSV
+                 writer.writerow(row)
+                 csvfile.flush()
+                 print(row)
+
+                 time_vals.append(curr_hour)
+                 bx_vals_plot.append(bx)
+                 by_vals_plot.append(by)
+                 bz_vals_plot.append(bz)
+                 temp_vals_plot.append(Temperature)
+
+
+                 line_bx4.set_data(time_vals, bx_vals_plot)
+                 line_by4.set_data(time_vals, by_vals_plot)
+                 line_bz4.set_data(time_vals, bz_vals_plot)
+                 line_temp4.set_data(time_vals, temp_vals_plot)
+
+                  # Set x-limits as last 60 entries
+                 ax4_left.set_xlim(time_vals[0], time_vals[-1] if len(time_vals) > 1 else time_vals[0])
+
+                 
+                 all_b_vals = list(bx_vals_plot) + list(by_vals_plot) + list(bz_vals_plot)
+                 ax4_left.set_ylim(min(all_b_vals) - 1, max(all_b_vals) + 1)
+
+                 # Set y-limits for right axis
+                 ax4_right.set_ylim(min(temp_vals_plot) - 1, max(temp_vals_plot) + 1)
+
+                 fig4.canvas.draw()
+                 fig4.canvas.flush_events()
+                 prev_hour =  curr_hour
+           
+            #print(f"Magnetic Fields: Bx={bx:.3f}, By={by:.3f}, Bz={bz:.3f}, X_THR={X_THR}, Z_THR={Z_THR}")
         except (IndexError, ValueError):
             continue
 
         # --- 3D plot ---
-        B = np.array([bx, 0, bz - Z_THR - 6.5])
+        B = np.array([bx, 0, bz - Z_THR + 2.1])
         B_norm = np.linalg.norm(B)
         B_unit = B / B_norm if B_norm > 0 else np.array([0, 0, 0])
 
@@ -119,7 +209,15 @@ try:
         text_str = (
             f"FenceBreachCount: {FenceBreachCount}\n"
             f"FenceBreachPeriod: {TimeElasped}s\n"
-            f"--------.......--------........"
+            f"--------.......--------........\n"
+        )
+
+        text_strng =(
+            f"TimeCount: {Time}s\n" 
+            f"ADC_VUNREG: {ADC}V\n"
+            f"Temperature: {Temperature}°C\n"
+            f"ΔTemp: {DeltaTemp}°C"
+             
         )
 
         ax3d.text2D(
@@ -137,7 +235,22 @@ try:
             )
         )
 
-        if (bz < Z_THR or bz > X_THR or dbx > 2 or dby > 2 or dbz > 2):
+        ax3d.text2D(
+            0.1, 0.95, text_strng,
+            transform=ax3d.transAxes,
+            ha='right',
+            va='top',
+            fontsize=10,
+            color='black',
+            bbox=dict(
+                boxstyle="round,pad=0.3",
+                facecolor="#9b5959",
+                edgecolor='black',
+                alpha=0.7
+            )
+        )
+
+        if (bz < Z_THR_min or bz > Z_THR or bx < X_THR or bz > X_THR_max or dbx > 2 or dby > 2 or dbz > 2):
             winsound.Beep(1000, 200)
             ax3d.text(0, 0, 1.4, "Tampering Detected!!!", color='red', fontsize=11, weight='bold')
 
@@ -166,18 +279,22 @@ try:
         by_vals.append(by)
         bz_vals.append(bz)
         z_thr.append(Z_THR)
+        z_thr_min.append( Z_THR_min)
         x_thr.append(X_THR)
+        x_thr_max.append(X_THR_max)
 
         line_bx.set_data(x_vals, bx_vals)
         line_by.set_data(x_vals, by_vals)
         line_bz.set_data(x_vals, bz_vals)
         line_z_thr.set_data(x_vals, z_thr)
+        line_z_thr_min.set_data(x_vals, z_thr_min)
         line_x_thr.set_data(x_vals, x_thr)
+        line_x_thr_max.set_data(x_vals, x_thr_max)
 
         ax2d.set_xlim(max(0, i - 100), i + 1)
-        all_b_vals = list(bx_vals) + list(by_vals) + list(bz_vals) + list(z_thr) + list(x_thr)
+        all_b_vals = list(bx_vals) + list(by_vals) + list(bz_vals) + list(z_thr) + list(x_thr) + list(z_thr_min) + list(x_thr_max) 
         ymin, ymax = min(all_b_vals), max(all_b_vals)
-        ax2d.set_ylim(ymin - 3, ymax + 3)
+        ax2d.set_ylim(ymin - 1, ymax + 1)
 
         fig2.canvas.draw()
         fig2.canvas.flush_events()
@@ -210,4 +327,3 @@ finally:
     ser.close()
     plt.ioff()
     plt.show()
-
