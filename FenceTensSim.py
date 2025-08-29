@@ -89,7 +89,7 @@ try:
             continue
 
         # --- 3D plot ---
-        B = np.array([bx, 0, bz-2.5])
+        B = np.array([bx, 0, bz - Z_THR - 6.5])
         B_norm = np.linalg.norm(B)
         B_unit = B / B_norm if B_norm > 0 else np.array([0, 0, 0])
 
@@ -136,8 +136,6 @@ try:
                 alpha=0.7
             )
         )
-
-
 
         if (bz < Z_THR or bz > X_THR or dbx > 2 or dby > 2 or dbz > 2):
             winsound.Beep(1000, 200)
@@ -212,3 +210,4 @@ finally:
     ser.close()
     plt.ioff()
     plt.show()
+
